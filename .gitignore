@@ -1,0 +1,37 @@
+# Data — large single-cell files are downloaded via data.py, never committed
+*.h5ad
+*.h5
+*.loom
+data/
+cardiomyocytes.h5ad
+
+# Generated outputs
+*.png
+*.jpg
+*.pdf
+results/
+gsea_results/
+attention_plots/
+classification_report.txt
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Models / artifacts
+*.joblib
+*.pkl
+models_out/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
