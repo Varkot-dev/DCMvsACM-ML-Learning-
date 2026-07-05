@@ -1,0 +1,74 @@
+[18:01:10] RESUMING from saved HVG matrix (Stages 1-2 already complete)
+[18:01:40] Loaded HVG matrix: (166519, 3000)
+Seed set to 42
+SCVI model with the following parameters: 
+n_hidden: 128, n_latent: 20, n_layers: 2, dropout_rate: 0.1, dispersion: gene, 
+gene_likelihood: zinb, latent_distribution: normal.
+Training status: Not Trained
+Model's adata is minified?: False
+[18:02:37] 
+[18:02:37] Stage 3: scVI pretraining (GPU confirmed working)...
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+You are using a CUDA device ('NVIDIA A40') that has Tensor Cores. To properly utilize them, you should set `torch.set_float32_matmul_precision('medium' | 'high')` which will trade-off precision for performance. For more details, read https://pytorch.org/docs/stable/generated/torch.set_float32_matmul_precision.html#torch.set_float32_matmul_precision
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Training:   0%|          | 0/30 [00:00<?, ?it/s]Epoch 1/30:   0%|          | 0/30 [00:00<?, ?it/s]Epoch 1/30:   3%|▎         | 1/30 [00:04<02:10,  4.51s/it]Epoch 1/30:   3%|▎         | 1/30 [00:04<02:10,  4.51s/it, v_num=1, train_loss=768]Epoch 2/30:   3%|▎         | 1/30 [00:04<02:10,  4.51s/it, v_num=1, train_loss=768]Epoch 2/30:   7%|▋         | 2/30 [00:06<01:27,  3.11s/it, v_num=1, train_loss=768]Epoch 2/30:   7%|▋         | 2/30 [00:06<01:27,  3.11s/it, v_num=1, train_loss=560]Epoch 3/30:   7%|▋         | 2/30 [00:06<01:27,  3.11s/it, v_num=1, train_loss=560]Epoch 3/30:  10%|█         | 3/30 [00:08<01:08,  2.55s/it, v_num=1, train_loss=560]Epoch 3/30:  10%|█         | 3/30 [00:08<01:08,  2.55s/it, v_num=1, train_loss=542]Epoch 4/30:  10%|█         | 3/30 [00:08<01:08,  2.55s/it, v_num=1, train_loss=542]Epoch 4/30:  13%|█▎        | 4/30 [00:10<00:59,  2.30s/it, v_num=1, train_loss=542]Epoch 4/30:  13%|█▎        | 4/30 [00:10<00:59,  2.30s/it, v_num=1, train_loss=537]Epoch 5/30:  13%|█▎        | 4/30 [00:10<00:59,  2.30s/it, v_num=1, train_loss=537]Epoch 5/30:  17%|█▋        | 5/30 [00:12<00:55,  2.20s/it, v_num=1, train_loss=537]Epoch 5/30:  17%|█▋        | 5/30 [00:12<00:55,  2.20s/it, v_num=1, train_loss=532]Epoch 6/30:  17%|█▋        | 5/30 [00:12<00:55,  2.20s/it, v_num=1, train_loss=532]Epoch 6/30:  20%|██        | 6/30 [00:14<00:52,  2.19s/it, v_num=1, train_loss=532]Epoch 6/30:  20%|██        | 6/30 [00:14<00:52,  2.19s/it, v_num=1, train_loss=528]Epoch 7/30:  20%|██        | 6/30 [00:14<00:52,  2.19s/it, v_num=1, train_loss=528]Epoch 7/30:  23%|██▎       | 7/30 [00:16<00:48,  2.13s/it, v_num=1, train_loss=528]Epoch 7/30:  23%|██▎       | 7/30 [00:16<00:48,  2.13s/it, v_num=1, train_loss=524]Epoch 8/30:  23%|██▎       | 7/30 [00:16<00:48,  2.13s/it, v_num=1, train_loss=524]Epoch 8/30:  27%|██▋       | 8/30 [00:18<00:45,  2.09s/it, v_num=1, train_loss=524]Epoch 8/30:  27%|██▋       | 8/30 [00:18<00:45,  2.09s/it, v_num=1, train_loss=521]Epoch 9/30:  27%|██▋       | 8/30 [00:18<00:45,  2.09s/it, v_num=1, train_loss=521]Epoch 9/30:  30%|███       | 9/30 [00:20<00:43,  2.06s/it, v_num=1, train_loss=521]Epoch 9/30:  30%|███       | 9/30 [00:20<00:43,  2.06s/it, v_num=1, train_loss=518]Epoch 10/30:  30%|███       | 9/30 [00:20<00:43,  2.06s/it, v_num=1, train_loss=518]Epoch 10/30:  33%|███▎      | 10/30 [00:22<00:40,  2.04s/it, v_num=1, train_loss=518]Epoch 10/30:  33%|███▎      | 10/30 [00:22<00:40,  2.04s/it, v_num=1, train_loss=515]Epoch 11/30:  33%|███▎      | 10/30 [00:22<00:40,  2.04s/it, v_num=1, train_loss=515]Epoch 11/30:  37%|███▋      | 11/30 [00:24<00:38,  2.04s/it, v_num=1, train_loss=515]Epoch 11/30:  37%|███▋      | 11/30 [00:24<00:38,  2.04s/it, v_num=1, train_loss=513]Epoch 12/30:  37%|███▋      | 11/30 [00:24<00:38,  2.04s/it, v_num=1, train_loss=513]Epoch 12/30:  40%|████      | 12/30 [00:26<00:38,  2.12s/it, v_num=1, train_loss=513]Epoch 12/30:  40%|████      | 12/30 [00:26<00:38,  2.12s/it, v_num=1, train_loss=510]Epoch 13/30:  40%|████      | 12/30 [00:26<00:38,  2.12s/it, v_num=1, train_loss=510]Epoch 13/30:  43%|████▎     | 13/30 [00:29<00:36,  2.17s/it, v_num=1, train_loss=510]Epoch 13/30:  43%|████▎     | 13/30 [00:29<00:36,  2.17s/it, v_num=1, train_loss=508]Epoch 14/30:  43%|████▎     | 13/30 [00:29<00:36,  2.17s/it, v_num=1, train_loss=508]Epoch 14/30:  47%|████▋     | 14/30 [00:32<00:37,  2.36s/it, v_num=1, train_loss=508]Epoch 14/30:  47%|████▋     | 14/30 [00:32<00:37,  2.36s/it, v_num=1, train_loss=506]Epoch 15/30:  47%|████▋     | 14/30 [00:32<00:37,  2.36s/it, v_num=1, train_loss=506]Epoch 15/30:  50%|█████     | 15/30 [00:34<00:34,  2.30s/it, v_num=1, train_loss=506]Epoch 15/30:  50%|█████     | 15/30 [00:34<00:34,  2.30s/it, v_num=1, train_loss=505]Epoch 16/30:  50%|█████     | 15/30 [00:34<00:34,  2.30s/it, v_num=1, train_loss=505]Epoch 16/30:  53%|█████▎    | 16/30 [00:36<00:30,  2.21s/it, v_num=1, train_loss=505]Epoch 16/30:  53%|█████▎    | 16/30 [00:36<00:30,  2.21s/it, v_num=1, train_loss=503]Epoch 17/30:  53%|█████▎    | 16/30 [00:36<00:30,  2.21s/it, v_num=1, train_loss=503]Epoch 17/30:  57%|█████▋    | 17/30 [00:38<00:27,  2.13s/it, v_num=1, train_loss=503]Epoch 17/30:  57%|█████▋    | 17/30 [00:38<00:27,  2.13s/it, v_num=1, train_loss=501]Epoch 18/30:  57%|█████▋    | 17/30 [00:38<00:27,  2.13s/it, v_num=1, train_loss=501]Epoch 18/30:  60%|██████    | 18/30 [00:40<00:25,  2.11s/it, v_num=1, train_loss=501]Epoch 18/30:  60%|██████    | 18/30 [00:40<00:25,  2.11s/it, v_num=1, train_loss=500]Epoch 19/30:  60%|██████    | 18/30 [00:40<00:25,  2.11s/it, v_num=1, train_loss=500]Epoch 19/30:  63%|██████▎   | 19/30 [00:42<00:22,  2.08s/it, v_num=1, train_loss=500]Epoch 19/30:  63%|██████▎   | 19/30 [00:42<00:22,  2.08s/it, v_num=1, train_loss=499]Epoch 20/30:  63%|██████▎   | 19/30 [00:42<00:22,  2.08s/it, v_num=1, train_loss=499]Epoch 20/30:  67%|██████▋   | 20/30 [00:44<00:20,  2.08s/it, v_num=1, train_loss=499]Epoch 20/30:  67%|██████▋   | 20/30 [00:44<00:20,  2.08s/it, v_num=1, train_loss=497]Epoch 21/30:  67%|██████▋   | 20/30 [00:44<00:20,  2.08s/it, v_num=1, train_loss=497]Epoch 21/30:  70%|███████   | 21/30 [00:46<00:18,  2.06s/it, v_num=1, train_loss=497]Epoch 21/30:  70%|███████   | 21/30 [00:46<00:18,  2.06s/it, v_num=1, train_loss=496]Epoch 22/30:  70%|███████   | 21/30 [00:46<00:18,  2.06s/it, v_num=1, train_loss=496]Epoch 22/30:  73%|███████▎  | 22/30 [00:48<00:16,  2.04s/it, v_num=1, train_loss=496]Epoch 22/30:  73%|███████▎  | 22/30 [00:48<00:16,  2.04s/it, v_num=1, train_loss=495]Epoch 23/30:  73%|███████▎  | 22/30 [00:48<00:16,  2.04s/it, v_num=1, train_loss=495]Epoch 23/30:  77%|███████▋  | 23/30 [00:50<00:14,  2.03s/it, v_num=1, train_loss=495]Epoch 23/30:  77%|███████▋  | 23/30 [00:50<00:14,  2.03s/it, v_num=1, train_loss=494]Epoch 24/30:  77%|███████▋  | 23/30 [00:50<00:14,  2.03s/it, v_num=1, train_loss=494]Epoch 24/30:  80%|████████  | 24/30 [00:52<00:11,  1.99s/it, v_num=1, train_loss=494]Epoch 24/30:  80%|████████  | 24/30 [00:52<00:11,  1.99s/it, v_num=1, train_loss=493]Epoch 25/30:  80%|████████  | 24/30 [00:52<00:11,  1.99s/it, v_num=1, train_loss=493]Epoch 25/30:  83%|████████▎ | 25/30 [00:54<00:09,  1.99s/it, v_num=1, train_loss=493]Epoch 25/30:  83%|████████▎ | 25/30 [00:54<00:09,  1.99s/it, v_num=1, train_loss=492]Epoch 26/30:  83%|████████▎ | 25/30 [00:54<00:09,  1.99s/it, v_num=1, train_loss=492]Epoch 26/30:  87%|████████▋ | 26/30 [00:56<00:07,  1.99s/it, v_num=1, train_loss=492]Epoch 26/30:  87%|████████▋ | 26/30 [00:56<00:07,  1.99s/it, v_num=1, train_loss=491]Epoch 27/30:  87%|████████▋ | 26/30 [00:56<00:07,  1.99s/it, v_num=1, train_loss=491]Epoch 27/30:  90%|█████████ | 27/30 [00:58<00:05,  2.00s/it, v_num=1, train_loss=491]Epoch 27/30:  90%|█████████ | 27/30 [00:58<00:05,  2.00s/it, v_num=1, train_loss=490]Epoch 28/30:  90%|█████████ | 27/30 [00:58<00:05,  2.00s/it, v_num=1, train_loss=490]Epoch 28/30:  93%|█████████▎| 28/30 [01:00<00:03,  2.00s/it, v_num=1, train_loss=490]Epoch 28/30:  93%|█████████▎| 28/30 [01:00<00:03,  2.00s/it, v_num=1, train_loss=489]Epoch 29/30:  93%|█████████▎| 28/30 [01:00<00:03,  2.00s/it, v_num=1, train_loss=489]Epoch 29/30:  97%|█████████▋| 29/30 [01:02<00:02,  2.01s/it, v_num=1, train_loss=489]Epoch 29/30:  97%|█████████▋| 29/30 [01:02<00:02,  2.01s/it, v_num=1, train_loss=488]Epoch 30/30:  97%|█████████▋| 29/30 [01:02<00:02,  2.01s/it, v_num=1, train_loss=488]Epoch 30/30: 100%|██████████| 30/30 [01:04<00:00,  2.06s/it, v_num=1, train_loss=488]Epoch 30/30: 100%|██████████| 30/30 [01:04<00:00,  2.06s/it, v_num=1, train_loss=488]`Trainer.fit` stopped: `max_epochs=30` reached.
+Epoch 30/30: 100%|██████████| 30/30 [01:04<00:00,  2.15s/it, v_num=1, train_loss=488]
+[18:03:42] scVI training done in 66s
+[18:03:42] scVI model saved.
+[18:03:44] Own-scVI latent shape: (166519, 20)
+[18:03:44] Stage 4: UMAP...
+[18:07:33] UMAP done in 229s
+[18:07:33] Stage 5: honest evaluation, raw genes vs scVI latent...
+[18:10:01] raw_genes_seurat_v3_RF: folds=['0.6811', '0.6495', '0.9134', '0.6818', '0.8909']  mean=0.7633
+[18:16:18] raw_genes_seurat_v3_XGB: folds=['0.7809', '0.6785', '0.8566', '0.6645', '0.8423']  mean=0.7646
+[18:17:21] scvi_latent_own_RF: folds=['0.6878', '0.6390', '0.7655', '0.7141', '0.8243']  mean=0.7261
+[18:17:25] scvi_latent_own_XGB: folds=['0.7525', '0.6349', '0.7416', '0.6760', '0.8138']  mean=0.7238
+[18:17:25] Stage 6: Hugging Face pretrained model comparison...
+[18:17:27] Hugging Face comparison FAILED (non-fatal): No module named 'requests'
+[18:17:27] Stage 7: full pseudobulk DE across all genes...
+[18:17:27] No cached full-gene filtered file found — re-deriving from original atlas for pseudobulk...
+[18:21:46] Pseudobulk matrix: 60 patients x 32383 genes
+[18:21:57] Wilcoxon across all genes done in 10s
+[18:21:57] FDR < 0.05: 0 genes
+[18:21:57] FDR < 0.10: 0 genes
+[18:21:57]                   gene      pval  fdr    log2fc
+11110             VTA1  0.000048  1.0  0.290899
+19880           ALG10B  0.000069  1.0  0.633458
+11010            MED23  0.000200  1.0  0.316100
+31640            PDGFB  0.000282  1.0 -1.778768
+2726          SLC30A10  0.000333  1.0  0.827788
+14905            SMILR  0.000362  1.0  1.310106
+7508             NAA11  0.000393  1.0  0.778366
+23848           UBE2Q2  0.000463  1.0 -0.466329
+31383  ENSG00000231405  0.000503  1.0  2.383177
+28629            SRSF6  0.000503  1.0  0.400571
+18033              CBL  0.000545  1.0 -0.492336
+15300            KLHL9  0.000545  1.0  0.487808
+9380   ENSG00000251031  0.000545  1.0  1.178913
+11829           IGFBP3  0.000591  1.0  0.829618
+28562       DLGAP4-AS1  0.000591  1.0 -0.552593
+[18:21:57] Stage 8: cell-substate stratified breakdown...
+[18:21:57] cell_states
+vCM1.0    66464
+vCM2      23115
+vCM3.0    21084
+vCM1.1    15707
+vCM1.2    14263
+vCM1.3    13389
+vCM4       6038
+vCM3.1     4152
+vCM5       2307
+[18:22:08]   vCM1.0: n=66464, AUC=0.6939
+[18:22:13]   vCM2: n=23115, AUC=0.7321
+[18:22:16]   vCM3.0: n=21084, AUC=0.7754
+[18:22:19]   vCM1.1: n=15707, AUC=0.6784
+[18:22:22]   vCM1.2: n=14263, AUC=0.6362
+[18:22:24]   vCM1.3: n=13389, AUC=0.6797
+[18:22:28]   vCM4: n=6038, AUC=0.6686
+[18:22:31]   vCM3.1: n=4152, AUC=0.6127
+[18:22:35]   vCM5: n=2307, AUC=0.6067
+[18:22:35] ALL STAGES COMPLETE.
+/usr/lib/python3.12/tempfile.py:1075: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmpxjgibi8q'>
+  _warnings.warn(warn_message, ResourceWarning)

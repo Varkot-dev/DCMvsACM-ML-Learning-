@@ -99,4 +99,62 @@ Raw Fano factor makes no such correction. It selects genes with high variance re
 
 Notebook fix: `notebooks/scvi_pretraining.ipynb`, cells 3–4, commit `71f8bcc`.
 
-Results to be added when training completes.
+---
+
+## Moving to a rented GPU, and the actual results
+
+Colab's free tier ran out of road. Even after the Fano-factor workaround, the pod kept crashing or stalling in ways that weren't worth fighting further. Rented an A40 (48GB VRAM, 503GB system RAM) from RunPod for about $0.45/hour — a few dollars total for the compute this needed. With that much headroom, every RAM-driven compromise from earlier in the night became unnecessary: the full 880k-cell atlas loaded without filtering tricks, and HVG selection used the proper `seurat_v3` method (loess-based, corrects for the mean-variance confound) instead of raw Fano factor.
+
+### Two new infrastructure problems, both fixed
+
+**CUDA/driver mismatch.** `pip install scvi-tools` pulled the newest PyTorch build, compiled for CUDA 13.0. The pod's driver only supported CUDA 12.8. Training crashed immediately with a clear error. Fixed by reinstalling PyTorch pinned to a CUDA 12.1 build (`pip install torch --index-url https://download.pytorch.org/whl/cu121`), which is backward-compatible with the 12.8 driver. Lesson for next time: always check `nvidia-smi` for the driver's CUDA version before installing anything, and pin PyTorch to match before installing other packages.
+
+**GPU utilization stuck at 7%.** Training worked but was barely touching the A40 — 7% utilization, 413MB of 46GB VRAM used, and an estimated 38 minutes for 100 epochs despite renting a GPU specifically to avoid slow runs. The cause: scVI's default batch size (128) meant ~1,300 tiny batches per epoch, each too small to saturate the GPU's parallelism. Setting `batch_size=4096` dropped this to ~40 batches per epoch. Result: GPU utilization jumped to 48%, and 30 epochs finished in 66 seconds — roughly an 11x speedup from one parameter.
+
+**Two trained models were lost to crashes before this got fixed.** First, sending a `KeyboardInterrupt` to stop a stalled run hit an internal bug in PyTorch Lightning's interrupt handler and killed the whole process — the model was never at any point saved to disk, so 18 minutes of training was gone. Second, after a successful 30-epoch run, the script crashed on `model.history["train_loss_epoch"]` — this scvi-tools version names the key `train_loss`, not `train_loss_epoch` — and because the crash happened before `model.save()` was called, that trained model was lost too. Fixed by reordering the script so `model.save()` and latent extraction happen immediately after training completes, before any other code runs, wrapped in a `try/except` so a history-logging quirk can never again destroy a completed training run.
+
+### The results
+
+**Honest classification AUC, patient-level 5-fold CV:**
+
+| Feature set | Random Forest | XGBoost |
+|---|---|---|
+| Raw genes, proper `seurat_v3` HVGs (3,000 genes) | 0.763 | 0.765 |
+| scVI latent (20 dims, pretrained from scratch on full atlas) | 0.726 | 0.724 |
+
+Two things stand out. First, correcting the HVG selection method alone raised AUC from ~0.70 (Fano factor, laptop) to ~0.76 (proper `seurat_v3`, full RAM) — a bigger jump than anything scVI pretraining produced. The earlier memory-constrained shortcut cost real signal. Second, and more importantly: **scVI's pretrained latent space did not outperform raw genes — it underperformed by about 3–4 AUC points.** The hypothesis going into tonight was that pretraining on 166k unlabeled cells would learn a representation that separates biological signal from technical noise better than raw expression values. That didn't happen here.
+
+This is a real, negative result, not a failure of execution. A better feature representation cannot manufacture a disease signal that isn't there in sufficient strength — and the pseudobulk analysis (below) independently confirms the signal is genuinely weak at this sample size.
+
+**Pseudobulk differential expression, full 32,383-gene panel, no pre-filtering:**
+
+FDR < 0.05: 0 genes. FDR < 0.10: 0 genes.
+
+Identical result to the laptop run — same top genes (VTA1, PDGFB, ALG10B), nearly identical p-values. This confirms the earlier "zero significant genes" finding wasn't an artifact of the memory-constrained pipeline; it's a genuine consequence of having 8 ACM donors. PDGFB remains the most biologically plausible lead (fibrosis signaling, higher in ACM, consistent with ACM's fibro-fatty pathology) despite not surviving correction.
+
+**Cell-substate stratified AUC — new tonight, not possible without this much RAM:**
+
+The atlas's `cell_states` column breaks cardiomyocytes into 9 substates (vCM1.0 through vCM5). Running the honest evaluation separately within each substate:
+
+| Substate | Cells | AUC |
+|---|---|---|
+| vCM3.0 | 21,084 | **0.775** |
+| vCM2 | 23,115 | 0.732 |
+| vCM1.0 | 66,464 | 0.694 |
+| vCM1.3 | 13,389 | 0.680 |
+| vCM1.1 | 15,707 | 0.678 |
+| vCM4 | 6,038 | 0.669 |
+| vCM1.2 | 14,263 | 0.636 |
+| vCM3.1 | 4,152 | 0.613 |
+| vCM5 | 2,307 | 0.607 |
+
+vCM3.0 classifies noticeably better than the whole-population average. This is a genuinely new lead: DCM/ACM signal is not spread evenly across cardiomyocyte substates — it's concentrated in some more than others. Worth investigating what distinguishes vCM3.0 biologically (which genes define it, what functional state it represents) as a next step, rather than continuing to treat all cardiomyocytes as one bucket.
+
+### What tonight actually established
+
+1. Correct HVG selection matters more than expected — a full 6-point AUC swing between the memory-constrained shortcut and the proper method.
+2. scVI pretraining, at least in this configuration (20 latent dims, 30 epochs, 3,000-gene input), does not improve on raw gene classification for this task. Worth remembering as a negative result before trying it again with different hyperparameters.
+3. The "zero significant genes" pseudobulk finding is robust — confirmed independently on the full atlas with the correct gene panel, not an artifact of any shortcut.
+4. Cell substate matters. vCM3.0 is the most promising lead for follow-up: either the DCM/ACM signal genuinely lives there, or it's worth checking whether vCM3.0 has a different sex/genotype composition than the rest of the cohort before reading too much into it.
+
+Raw result files: `results/runpod_full_scale/`
