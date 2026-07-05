@@ -5,7 +5,7 @@ The most important test here is test_no_patient_leaks_across_folds.
 This is the assertion that proves we fixed the core bug: no patient
 appears in both the training and validation fold at the same time.
 
-Interview talking point:
+Design note:
   "I wrote a test that explicitly asserts donor integrity across folds.
   If someone accidentally changes the split back to cell-level, this
   test fails immediately — it acts as a guardrail."
@@ -101,7 +101,7 @@ def test_no_patient_leaks_across_folds(arrays):
     pass because StratifiedKFold doesn't use groups — but the split would be
     wrong. The test guards against reintroducing GroupKFold incorrectly.
 
-    Interview talking point:
+    Design note:
       "I wrote an explicit assertion that checks donor integrity across folds.
       It's the test that proves the evaluation is honest."
     """

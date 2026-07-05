@@ -19,7 +19,7 @@ Computational biology note:
   imblearn knows to skip it during predict/transform on val data. This is
   exactly the correct behaviour.
 
-  Interview talking point:
+  Design note:
     "SMOTE inside an imblearn Pipeline means the synthetic cells never appear
     in the validation fold. This is the fix for the original code's leakage,
     where SMOTE ran on the full dataset before the split."

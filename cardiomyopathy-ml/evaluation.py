@@ -183,7 +183,7 @@ def evaluate_naive(
 
     We compute this explicitly so we can show the inflation.
 
-    Interview talking point:
+    Design note:
       "The naive AUC was X. After switching to patient-level splitting,
       it dropped to Y. The gap of Z is how much the original code was
       cheating — the model was memorising patients, not learning disease."

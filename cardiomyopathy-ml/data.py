@@ -46,7 +46,7 @@ def validate_adata(adata: ad.AnnData) -> None:
     Assert the data contract before any processing.
     Raises ValueError with a clear message if anything is wrong.
 
-    Interview talking point:
+    Design note:
       Validating at the data boundary is standard in production ML.
       If you skip this and the 'donor_id' column is named differently
       in a new dataset, your group-aware split silently fails and you
@@ -169,7 +169,7 @@ def extract_arrays(
         y: Integer disease labels (0=ACM, 1=DCM), shape (n_cells,).
         groups: Donor ID as integers for StratifiedGroupKFold, shape (n_cells,).
 
-    Interview talking point:
+    Design note:
       'groups' is the key ingredient for honest evaluation. It encodes which
       patient each cell came from. Passing groups to StratifiedGroupKFold
       ensures all cells from a given patient land in the same fold — so the
@@ -237,7 +237,7 @@ def make_synthetic_data(
     of the first 20 genes on average. This lets us verify that AUC > 0.5 even
     without real biology — a sanity check that the pipeline isn't broken.
 
-    Interview talking point:
+    Design note:
       "I built against synthetic data first so I could write tests that assert
       the exact behaviour I expect — no patient leaks across folds, probabilities
       in [0,1], no NaNs — before I ever touched the real dataset."

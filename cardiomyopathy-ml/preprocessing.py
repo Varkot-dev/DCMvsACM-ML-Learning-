@@ -18,7 +18,7 @@ Computational biology note:
      from training cells only. Standard sklearn practice, extended here
      to the bioinformatics context.
 
-  Interview talking point:
+  Design note:
     "HVG selection inside the fold is the subtlety most published pipelines
     miss — it's a data-driven feature selection step, so it belongs inside
     cross-validation just like the scaler does."

@@ -2,7 +2,7 @@
 
 **Can we trust AUC numbers in single-cell RNA-seq machine learning?**
 
-Built by Varshith Kotagiri (University of Pennsylvania) with Claude Code.  
+Varshith Kotagiri — University of Pennsylvania  
 This is a learning project. The goal is not to ship a clinical tool — it's to understand what honest evaluation looks like, why it matters, and what the data actually says.
 
 ---
@@ -256,4 +256,4 @@ python run_experiment.py --data cardiomyocytes.h5ad --n-genes 2500 --n-splits 5
 
 ---
 
-*Built with Claude Code. Every design decision in this pipeline has a reason — ask me about any of them.*
+Every design decision in this pipeline has a reason. If something seems arbitrary, dig into it — there's always a biological or statistical justification.

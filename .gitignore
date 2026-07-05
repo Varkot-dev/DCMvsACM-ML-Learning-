@@ -39,3 +39,5 @@ models_out/
 .idea/
 # NumPy binary artifacts from EDA (large, not reproducible reference)
 results/*.npy
+docs/superpowers/
+docs/interview-notes.md
