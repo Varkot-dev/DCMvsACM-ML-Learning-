@@ -1,91 +1,70 @@
-# Professor Outreach — Draft Emails
+# Professor Outreach — Drafts
 
-These are cold emails to Penn faculty doing cardiac genomics. Goal: access to a larger ACM cohort, or collaboration on the evaluation framework paper. Send one at a time, personalize the bracketed sections before sending.
+Method-forward: lead with the finding, then the ask. Personalise brackets. One per day. Attach or link 2–3 figures (leakage dumbbell, SHAP, pseudobulk volcano) — not the whole repo.
 
 ---
 
-## Target 1 — Dr. Sharlene Day (Penn CVI, genetic cardiomyopathies)
+## 1 — Dr. Sharlene Day (Penn CVI · inherited cardiomyopathies)
 
-**Why her:** Runs the Penn Center for Inherited Cardiac Disease. Sees ACM patients clinically. Has published on genetic heart muscle diseases. Most likely to have patient samples or know who does.
+Best fit: she runs the Penn Center for Inherited Cardiac Disease and sees ACM patients clinically.
 
-**Email:**
-
-Subject: Single-cell ML evaluation framework for ACM/DCM — potential collaboration
+**Subject:** Patient-level evaluation of DCM/ACM single-cell classifiers — a leakage result + a data question
 
 Dr. Day,
 
-I'm Varshith Kotagiri, a sophomore at Penn studying [your major]. I've been working independently on a computational analysis of the Reichart 2022 single-cell cardiac atlas, focused on classifying dilated versus arrhythmogenic cardiomyopathy.
+I'm Varshith Kotagiri, a second-year at Penn. Working independently with the Reichart 2022 cardiac atlas, I found that the standard way single-cell classifiers are evaluated inflates performance substantially: splitting cells randomly across cross-validation folds lets a model recognise individual patients instead of learning disease, and it inflated DCM-vs-ACM AUC from 0.70 to 0.88 in my hands. Enforcing patient-level folds removes 13–18 AUC points.
 
-The main finding is methodological: standard cross-validation in single-cell ML inflates AUC by 13–18 points by leaking patient identity across folds. After fixing the evaluation to respect patient boundaries, honest AUC drops from 0.88 to 0.70. A follow-up pseudobulk differential expression analysis at the patient level found no genes surviving FDR correction, which I think correctly reflects the statistical reality of n=8 ACM donors rather than a biological absence of signal.
+Pushing further, a pseudobulk differential-expression analysis at the patient level (Wilcoxon, BH-corrected across 32,383 genes) returned no significant genes — which I read as an honest consequence of eight ACM donors rather than an absence of biology. The strongest raw signal was PDGFB, higher in ACM, which fits ACM's fibro-fatty pathology but doesn't survive correction at this n.
 
-The most interesting raw hit is PDGFB (log₂FC = −1.78, higher in ACM, p = 0.00028 uncorrected) — consistent with ACM's fibro-fatty pathology — but it doesn't survive multiple testing at this sample size.
+I'd value fifteen minutes of your time. Concretely, I'm hoping to learn whether your group has additional ACM single-cell or bulk RNA-seq data that could raise the donor count, and whether the evaluation problem is worth writing up. Three summary figures are attached; code and full notes are at [REPO URL].
 
-I'm writing because the analysis is statistically limited by the eight ACM patients in Reichart. I'd like to ask whether your lab has access to additional ACM single-cell or bulk RNA-seq data, or whether you'd be interested in discussing the evaluation framework. The code and results are on GitHub: [your repo URL].
+Thank you for considering it.
 
-I'm happy to come by during office hours or whenever works for you.
-
-Best,
 Varshith Kotagiri
-University of Pennsylvania, Class of 2029
-varkot06@sas.upenn.edu
+Penn Class of 2029 · varkot06@sas.upenn.edu
 
 ---
 
-## Target 2 — Zoltan Arany Lab (Penn CVI, cardiovascular metabolism)
+## 2 — Zoltan Arany Lab (Penn CVI · cardiovascular metabolism / snRNA-seq)
 
-**Why him:** Arany Lab at Penn CVI does metabolic and transcriptomic profiling of heart failure. Published snRNA-seq work on cardiac remodeling. Less directly focused on ACM but has the infrastructure and dataset access.
+Fit: infrastructure and heart-failure snRNA-seq data, though less ACM-specific.
 
-**Email:**
-
-Subject: Honest evaluation framework for single-cell cardiomyopathy classification
+**Subject:** Leakage in single-cell cardiomyopathy classifiers — result + collaboration question
 
 Dr. Arany,
 
-I'm Varshith Kotagiri, a sophomore at Penn. I've been building a machine learning pipeline for classifying dilated versus arrhythmogenic cardiomyopathy from the Reichart 2022 single-cell atlas.
+I'm Varshith Kotagiri, a second-year at Penn. Analysing the Reichart 2022 atlas, I found that cell-level cross-validation inflates DCM-vs-ACM AUC by 13–18 points versus patient-level folds — the model is largely recognising patients, not disease. A patient-level pseudobulk analysis then found no genes surviving FDR across 32,383 tests at eight ACM donors, with PDGFB as the strongest uncorrected hit (higher in ACM; consistent with fibrosis).
 
-The core finding is about evaluation methodology: the standard approach of randomly splitting cells across CV folds inflates AUC by 13–18 points because it lets the model memorize patient-specific expression patterns rather than learning disease biology. Correcting for patient boundaries drops performance from 0.88 to 0.70 AUC. I then ran pseudobulk differential expression at the patient level and found no genes surviving FDR correction across 32,383 genes at n=8 ACM donors — which I think is the honest statistical answer at that sample size.
+The analysis is capped by sample size, so I'm looking for ways to add patients. If your lab has cardiac single-cell data from heart-failure donors — especially any with genetic diagnoses — I'd be glad to discuss whether the framework could extend to it. Figures attached; repo at [REPO URL].
 
-I'm trying to figure out whether adding patients changes the picture. I'm aware of the 2024 BMC Medicine ARVC dataset (6 end-stage patients, Huang et al.) and am planning to test cross-cohort generalization. If your lab has cardiac single-cell data from heart failure patients — particularly any with known genetic diagnoses — I'd be interested in discussing whether there's a way to extend the analysis.
+Grateful for any pointer, even to a better-suited group.
 
-The repo is here: [your repo URL]. Happy to share more detail or come by the lab.
-
-Best,
 Varshith Kotagiri
-University of Pennsylvania, Class of 2029
-varkot06@sas.upenn.edu
+Penn Class of 2029 · varkot06@sas.upenn.edu
 
 ---
 
-## Target 3 — Cold email to corresponding author of BMC Medicine 2024 ARVC paper
+## 3 — Corresponding author, BMC Medicine 2024 ARVC paper
 
-**Why:** They have a separate ACM single-cell dataset (6 ARVC patients). Combining with Reichart gets to 14 ACM donors. This is the most direct path to more data.
+Their 6-patient ARVC dataset would roughly double the ACM cohort. Most direct path to more data.
+Paper: https://bmcmedicine.biomedcentral.com/articles/10.1186/s12916-023-03232-8 — pull the corresponding author's name/email from it.
 
-**Find the paper:** "Single-cell RNA sequencing in donor and end-stage heart failure patients identifies NLRP3 as a therapeutic target for arrhythmogenic right ventricular cardiomyopathy" — BMC Medicine, 2024. Find the corresponding author and their email on the paper.
+**Subject:** Data-sharing inquiry — your ARVC single-cell dataset (BMC Medicine 2024)
 
-**Email:**
+Dear Dr. [NAME],
 
-Subject: Data sharing inquiry — ARVC single-cell dataset (BMC Medicine 2024)
+I read your 2024 BMC Medicine study on single-cell profiling in ARVC closely. I'm Varshith Kotagiri, a second-year at Penn, building a patient-level evaluation framework for DCM-vs-ACM classification on the Reichart 2022 atlas. My main constraint is its eight ACM donors; your six ARVC patients would nearly double that and let me test cross-cohort generalisation.
 
-Dear Dr. [Name],
+Is your single-cell data publicly deposited, or is there a sharing pathway I could follow? I'm happy to share my results and discuss a joint analysis. Summary at [REPO URL].
 
-I read your 2024 BMC Medicine paper on single-cell RNA sequencing in ARVC with great interest. I'm Varshith Kotagiri, a sophomore at the University of Pennsylvania, working independently on a machine learning evaluation framework for DCM vs ACM classification using the Reichart 2022 cardiac atlas.
-
-The main constraint in my analysis is sample size — Reichart has 8 ACM patients, which limits statistical power at the patient level. Your dataset (6 end-stage ARVC patients) would roughly double the ACM cohort available for analysis. I'm writing to ask whether your single-cell data is publicly deposited or whether there's a data sharing pathway I could pursue.
-
-My current results and code are at [your repo URL]. I'm happy to share more detail about the analysis, discuss a potential collaboration, or work through whatever data access process your institution requires.
-
-Thank you for considering this.
-
+Thank you,
 Varshith Kotagiri
-University of Pennsylvania, Class of 2029
-varkot06@sas.upenn.edu
+Penn Class of 2029 · varkot06@sas.upenn.edu
 
 ---
 
-## Notes before sending
-
-- Personalize the bracketed sections
-- Add the GitHub repo URL throughout
-- For Target 3: find the paper at https://bmcmedicine.biomedcentral.com/articles/10.1186/s12916-023-03232-8 and get the corresponding author's name and email from the paper itself
-- Send one per day, not all at once
-- If no response in two weeks, one follow-up is appropriate
+### Checklist before sending
+- [ ] Fill [REPO URL] and [NAME]
+- [ ] Attach figF_leakage, figD_shap, figE_pseudobulk (PNG)
+- [ ] Confirm the BMC corresponding author from the paper
+- [ ] Send one per day; single follow-up after ~2 weeks if silent
