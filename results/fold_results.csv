@@ -1,0 +1,21 @@
+classifier,split_type,fold,roc_auc,n_train,n_val,n_donors_val
+Random Forest,naive_cell_level,1,0.8330,133215,33304,33304
+Random Forest,naive_cell_level,2,0.8349,133215,33304,33304
+Random Forest,naive_cell_level,3,0.8326,133215,33304,33304
+Random Forest,naive_cell_level,4,0.8333,133215,33304,33304
+Random Forest,naive_cell_level,5,0.8354,133216,33303,33303
+Random Forest,honest_patient_level,1,0.6223,133769,32750,12
+Random Forest,honest_patient_level,2,0.5659,133576,32943,12
+Random Forest,honest_patient_level,3,0.8174,131775,34744,12
+Random Forest,honest_patient_level,4,0.6609,133241,33278,12
+Random Forest,honest_patient_level,5,0.8583,133715,32804,12
+XGBoost,naive_cell_level,1,0.8836,133215,33304,33304
+XGBoost,naive_cell_level,2,0.8843,133215,33304,33304
+XGBoost,naive_cell_level,3,0.8783,133215,33304,33304
+XGBoost,naive_cell_level,4,0.8816,133215,33304,33304
+XGBoost,naive_cell_level,5,0.8882,133216,33303,33303
+XGBoost,honest_patient_level,1,0.6700,133769,32750,12
+XGBoost,honest_patient_level,2,0.5920,133576,32943,12
+XGBoost,honest_patient_level,3,0.8099,131775,34744,12
+XGBoost,honest_patient_level,4,0.5666,133241,33278,12
+XGBoost,honest_patient_level,5,0.8654,133715,32804,12

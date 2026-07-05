@@ -1,0 +1,7 @@
+classifier,split_type,mean_roc_auc,std_roc_auc,ci_95,mean_avg_precision,n_folds
+Random Forest,naive_cell_level,0.8338,0.001,0.834 ± 0.002,0.9538,5
+XGBoost,naive_cell_level,0.8832,0.0034,0.883 ± 0.007,0.9717,5
+Random Forest,honest_patient_level,0.7050,0.1131,0.705 ± 0.226,,5
+XGBoost,honest_patient_level,0.7008,0.1238,0.701 ± 0.248,,5
+Random Forest,LEAKAGE_INFLATION,0.1288,,,, 
+XGBoost,LEAKAGE_INFLATION,0.1824,,,,

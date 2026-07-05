@@ -9,7 +9,9 @@ cardiomyocytes.h5ad
 *.png
 *.jpg
 *.pdf
-results/
+# results/ — CSVs are tracked; only exclude large plot files
+results/*.png
+results/*.pdf
 gsea_results/
 attention_plots/
 classification_report.txt
