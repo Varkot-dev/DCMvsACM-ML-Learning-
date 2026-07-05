@@ -1,0 +1,10 @@
+classifier,split_type,mean_roc_auc,std_roc_auc,ci_95,mean_avg_precision,n_folds
+Random Forest,naive_cell_level,0.5116,0.0227,0.512 ± 0.045,0.7078,3
+Random Forest,honest_patient_level,0.5005,0.0051,0.501 ± 0.010,0.7022,3
+XGBoost,naive_cell_level,0.5006,0.0144,0.501 ± 0.029,0.7015,3
+XGBoost,honest_patient_level,0.506,0.0172,0.506 ± 0.034,0.7022,3
+Logistic Regression,naive_cell_level,0.526,0.0184,0.526 ± 0.037,0.7173,3
+Logistic Regression,honest_patient_level,0.5312,0.0089,0.531 ± 0.018,0.7221,3
+Random Forest,LEAKAGE_INFLATION,0.0111,,naive-honest = 0.512 - 0.500,,
+XGBoost,LEAKAGE_INFLATION,-0.0054,,naive-honest = 0.501 - 0.506,,
+Logistic Regression,LEAKAGE_INFLATION,-0.0052,,naive-honest = 0.526 - 0.531,,

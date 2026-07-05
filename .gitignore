@@ -37,3 +37,5 @@ models_out/
 .DS_Store
 .vscode/
 .idea/
+# NumPy binary artifacts from EDA (large, not reproducible reference)
+results/*.npy
