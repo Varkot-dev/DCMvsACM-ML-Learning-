@@ -69,6 +69,34 @@ Three paths forward:
 
 ## scVI pretraining
 
-Running on Google Colab T4 GPU tonight. The hypothesis: a variational autoencoder pretrained on all 880,000 cells (no labels) learns a 20-dimensional latent space that separates biological signal from technical noise. Classification on the latent representation may outperform classification on 32,000 raw gene values — or it may confirm that the signal is genuinely too weak regardless of feature engineering. Either result is informative.
+Started this on Google Colab with a T4 GPU. The hypothesis: a variational autoencoder pretrained on all 880,000 cells (no labels) learns a 20-dimensional latent space that separates biological signal from technical noise. Classification on the latent representation may outperform classification on 32,000 raw gene values — or it may confirm that the signal is genuinely too weak regardless of feature engineering. Either result is informative.
+
+It did not go smoothly, and the failure is worth documenting because the fix involved a real methodological compromise, not just a bug.
+
+### What broke
+
+The original notebook loaded the full h5ad with `ad.read_h5ad(H5AD_PATH)` — all 880,000 cells, 32,383 genes, into RAM at once — then called `sc.pp.highly_variable_genes(adata, n_top_genes=3000, flavor='seurat_v3')` to select highly variable genes before training.
+
+`seurat_v3` is not a simple statistic. It fits a loess (locally estimated scatterplot smoothing) regression across all genes to model the expected relationship between mean expression and variance, then selects genes with more variance than that curve predicts for their expression level. Fitting and applying that regression requires scanpy to work with dense representations of large chunks of the matrix internally, even though the input is sparse. A full dense version of this matrix would be roughly 880,000 × 32,383 × 4 bytes ≈ 114 GB — scanpy chunks this rather than materializing it all at once, but the peak memory during those chunked operations, combined with the already-loaded sparse matrix and Python/scanpy overhead, exceeded Colab's free-tier 12.7 GB RAM ceiling. The session crashed with "used all available RAM" partway through this cell, more than once, including after a kernel restart.
+
+### What we changed
+
+**Loading:** switched to `ad.read_h5ad(H5AD_PATH, backed='r')` followed by `adata[mask].to_memory()`, filtering to DCM+ACM cells *while* reading rather than after. `backed='r'` opens a file handle without pulling the expression matrix into memory; `.to_memory()` then materializes only the ~166,000 matching rows. This alone cuts memory roughly 5x before any gene-selection computation happens.
+
+**Gene selection:** replaced `seurat_v3` with a sparse Fano factor calculation — variance divided by mean, computed as `E[X²] − E[X]²` using `X.mean(axis=0)` and `X.power(2).mean(axis=0)` directly on the sparse matrix. Both operations are sparse-aware column reductions; neither requires densifying anything. This is the same method already used in the laptop pipeline (`data.py`) for pre-selecting genes before the full 40 GB matrix would otherwise need to be dense.
+
+### Why the replacement is a worse method, not just a different one
+
+This needs to be said plainly: Fano factor and `seurat_v3` are not interchangeable, and the substitution was made for memory reasons, not because it's the better statistic.
+
+`seurat_v3`'s loess correction exists to solve a specific, well-known problem in scRNA-seq: genes with higher mean expression mechanically have higher variance from Poisson counting noise alone, independent of any biology. The loess curve models that expected noise floor, and genes are selected based on their *residual* variance above that curve — variance that can't be explained by expression level alone is a better proxy for genuine biological variability. This method was developed and validated by the Satija lab specifically to correct for that mean-variance confound, and it's the field-standard default for a reason.
+
+Raw Fano factor makes no such correction. It selects genes with high variance relative to mean, full stop, without asking whether that variance is expected from counting noise given the expression level. In practice this biases selection toward highly-expressed genes, some fraction of which are "variable" only because of Poisson noise, not biology. The 3,000 genes selected by Fano factor and the 3,000 that `seurat_v3` would have selected overlap substantially but not completely — some genes with moderate expression and genuinely interesting variance patterns may be excluded in favor of genes that are just noisy because they're highly expressed.
+
+**Concretely, this means:** scVI's pretraining tonight sees a slightly less curated, slightly noisier 3,000-gene panel than the field-standard approach would provide. If the eventual latent-space classification result comes back different from what raw-gene classification produced, part of that difference could be attributable to gene panel quality rather than the value of pretraining itself.
+
+**How much this matters:** for the purpose of tonight's run — a first-pass check on whether latent features help at all — this is an acceptable, honest shortcut. It would not be acceptable for a publication-quality result. The correct fix there is either running `seurat_v3` on a machine with enough RAM (Penn HPC, or Colab Pro's high-RAM runtime), or explicitly validating that Fano-factor-selected genes give comparable downstream results to `seurat_v3`-selected genes before trusting the comparison.
+
+Notebook fix: `notebooks/scvi_pretraining.ipynb`, cells 3–4, commit `71f8bcc`.
 
 Results to be added when training completes.
