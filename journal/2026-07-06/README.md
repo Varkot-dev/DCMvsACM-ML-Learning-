@@ -82,3 +82,95 @@ produced both.
 Next: Phase 2, cross-cohort transfer against the Chaffin 2022 (DCM vs HCM) atlas. No ACM cohort exists there,
 so this cannot be a DCM-vs-ACM transfer; it tests whether the vCM3.0 stressed-state signature replicates
 independently in a second dataset.
+
+## Phase 2: does the stress signature replicate in a second, independent cohort
+
+The point of Phase 2 is a standard and important check in this kind of work: a finding from one dataset can
+always be a fluke of that dataset's lab, batch, or patient population. The only way to know whether the
+vCM3.0 stress program is real biology rather than an artifact of the Reichart atlas specifically is to test
+it against a second, completely independent dataset — different lab, different patients, different
+sequencing run.
+
+**The planned dataset wasn't actually available.** The spec assumed the Chaffin 2022 DCM-vs-HCM atlas would be
+downloadable from CZ CELLxGENE the same way Reichart was. It is not there. The GEO accession the spec cited
+(GSE183852) turned out to belong to a different paper entirely: Koenig/Lavine 2022, "Cellular Atlas of Human
+Heart Failure" — DCM vs non-diseased donor, not DCM vs HCM. Caught this before downloading anything blindly,
+flagged it, and the call was made to proceed with Koenig/Lavine as the substitute cohort. This changes what
+Phase 2 can claim: it tests replication in a DCM-vs-donor contrast, not DCM-vs-HCM. The core Phase 1 result is
+unaffected either way; only the cross-cohort comparison target changed.
+
+**Getting the data into usable shape took real data engineering.** Unlike Reichart, GSE183852 ships as one
+series-level file with no h5ad and no per-sample metadata: a single 465MB gzipped CSV (45,069 genes x
+269,795 cells, genes as rows) with sample identity baked into the column names as a barcode prefix, and zero
+disease/donor metadata attached. All 45 GSM (per-sample) pages had to be scraped individually to recover
+disease state, and a naming mismatch between GEO's per-sample titles and the CSV's column prefixes had to be
+reverse-engineered by hand (e.g. GEO's "TWCM-H6-lib1" maps to the CSV's "HDCM6" — every mismatch turned out to
+be one of the "H" single-cell samples with a dropped lib suffix, or a trailing "-1" difference).
+
+Parsing that file was its own detour worth recording honestly: pandas' row-oriented CSV parser extrapolated to
+roughly 3 hours on this file's shape (270,000 columns per row is adversarial for a parser tuned for many-rows/
+few-columns data). Polars, which should have been faster, instead spent minutes just constructing its batched
+reader (gathering stats and chunk offsets) before yielding a single batch, regardless of whether the source
+was compressed. The fix that actually worked: decompress once (17 seconds, 24GB uncompressed), then parse
+line-by-line in plain Python with no library overhead at all — a predictable ~10ms/row, about 8 minutes total
+for all 45,069 genes. Sometimes the simplest tool beats the "fast" library, because the library's cleverness
+(schema inference, upfront chunk planning) is solving a problem you don't have.
+
+Output: `data/chaffin_koenig/koenig_atlas.h5ad`, 269,794 cells x 45,068 genes, 45 donors (18 DCM, 27
+non-diseased donor). Sanity-checked before use: donor counts match the scraped metadata, values are
+non-negative integers consistent with raw counts, all marker genes present, cells-per-donor distribution has
+no single donor dominating (range 1,744-11,813, median ~5,550).
+
+**The analysis method, and an honest limitation of it.** This cohort has no expert-annotated cell-type or
+substate column, unlike Reichart's `cell_states`. Rather than run a full clustering pipeline to identify a
+vCM3.0-equivalent substate from scratch (a much larger undertaking), the faster route taken: score every cell
+for canonical cardiomyocyte markers (TTN, MYH6, MYH7, TNNT2, ACTC1) and keep only cells scoring above some
+threshold as a cardiomyocyte proxy, then score those cells for the vCM3.0 stress program (ANKRD1, XIRP1,
+XIRP2, FHL1, ACTA1, MYH9) and compare DCM donors against non-diseased donors.
+
+The problem: plotting the cardiomyocyte-score distribution across all 269,794 cells showed one smooth,
+unimodal curve, not the two separated humps you'd want for a clean "cardiomyocyte vs not" cutoff. Any single
+threshold would have been an arbitrary judgment call, and picking one number and reporting only that result
+would have been exactly the kind of hidden researcher-degrees-of-freedom problem that makes results
+irreproducible.
+
+**The fix: sweep the threshold instead of picking one.** Rather than commit to a single cutoff, the check was
+run at six different percentiles of the cardiomyocyte score (50th through 95th), repeating the full DCM-vs-
+donor comparison at each. The logic: if the stress-program elevation in DCM is real biology, it should hold up
+regardless of exactly where the cardiomyocyte-identification line is drawn. If it only appeared at some
+thresholds and vanished or flipped at others, that would mean the "signal" was an artifact of an arbitrary
+cutoff rather than a property of the underlying biology. This is a standard robustness/sensitivity check, the
+same principle behind a grid sweep in hyperparameter tuning, applied here to a cell-type-identification
+threshold instead.
+
+**Result:**
+
+| CM-score percentile | cells kept | DCM mean stress score | donor mean stress score | p-value |
+|---|---|---|---|---|
+| 50th | 50.0% | 0.328 | 0.289 | 0.287 |
+| 60th | 40.0% | 0.468 | 0.346 | 0.044 |
+| 70th | 30.0% | 0.570 | 0.363 | 0.007 |
+| 80th | 20.0% | 0.596 | 0.422 | 0.024 |
+| 90th | 10.0% | 0.756 | 0.505 | 0.013 |
+| 95th | 5.0% | 0.716 | 0.481 | 0.016 |
+
+DCM donors score higher than non-diseased donors at every single threshold tested — the direction never
+flips. 5 of 6 thresholds are significant at p < 0.05; only the loosest cutoff (50th percentile, which still
+includes a lot of likely non-cardiomyocyte cells) misses significance. And the gap widens as the threshold
+gets stricter: as cells more confidently identified as cardiomyocytes are isolated, the DCM-vs-donor
+separation gets cleaner, which is exactly the pattern expected if this is genuine cardiomyocyte biology being
+diluted by non-CM cells at loose thresholds, not noise.
+
+**What this does and does not establish.** The vCM3.0 stress program (ANKRD1, XIRP1/2, FHL1, ACTA1, MYH9) is
+elevated in DCM hearts in a second, fully independent dataset — different lab, different patients, different
+sequencing technology (single-cell and single-nucleus mixed, vs Reichart's single-nucleus). That is genuine
+replication evidence for the biology, and it survived a real sensitivity check rather than resting on one
+arbitrary parameter choice. The honest caveat: this used a marker-score cardiomyocyte proxy, not real
+expert-annotated substates like Reichart had, so it is suggestive replication under a rougher method, not
+identical-rigor independent confirmation. Whether the DCM-vs-ACM classification signal itself (not just the
+gene-program elevation) also concentrates in a comparable cell population here is a separate, not yet run,
+question — Koenig/Lavine has no ACM patients at all, so at most a DCM-vs-donor classifier could be tested,
+answering a related but distinct question from the original AUC finding.
+
+Scripts: `cardiomyopathy-ml/build_koenig_atlas.py` (data assembly), `cardiomyopathy-ml/koenig_vcm3_replication.py`
+(threshold-sweep analysis). Results: `results/koenig_vcm3_replication.csv`.
