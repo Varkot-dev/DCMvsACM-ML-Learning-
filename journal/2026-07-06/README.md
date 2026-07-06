@@ -174,3 +174,99 @@ answering a related but distinct question from the original AUC finding.
 
 Scripts: `cardiomyopathy-ml/build_koenig_atlas.py` (data assembly), `cardiomyopathy-ml/koenig_vcm3_replication.py`
 (threshold-sweep analysis). Results: `results/koenig_vcm3_replication.csv`.
+
+## Phase 2 continued: does the classification signal (not just the gene score) replicate too
+
+The replication check above tested one gene program's average activity. A different, complementary question:
+can a classifier trained on a cell's full expression profile actually predict DCM vs non-diseased donor, and
+does that predictive signal concentrate in cardiomyocyte-like cells the same way it did in Reichart (honest
+AUC 0.775 in vCM3.0 vs 0.726 whole-population)? No ACM cohort exists in Koenig/Lavine, so this is necessarily
+DCM-vs-donor, not DCM-vs-ACM — same substitution and caveat as the rest of Phase 2.
+
+Method: honest, patient-level evaluation via StratifiedGroupKFold (all cells from one donor stay in one fold,
+same logic as the "naive vs honest AUC" result that was the strongest finding in Phase 1), RandomForest on the
+top 2,000 highly-variable genes, run at the same six CM-score percentile thresholds as the replication check.
+Runs entirely on CPU in minutes — no GPU needed. The RunPod GPU rental in Phase 1 was for scVI, a neural
+network trained with gradient descent over many epochs; a RandomForest here is a fundamentally lighter
+computation.
+
+**First result: honest AUC of 0.92-0.97 across every threshold**, and like the gene-score result, it gets
+stronger as the cardiomyocyte-identification threshold gets stricter (0.924 at 50th percentile up to 0.965 at
+90th). This is a dramatically higher number than Phase 1's DCM-vs-ACM honest AUC (0.70) — expected, since
+DCM-vs-healthy-donor is a fundamentally easier problem than DCM-vs-ACM (two different diseases that are both
+heart failure). Believable on its face, but a number this high on a new dataset needs scrutiny before it's
+trusted, not just excitement.
+
+## The confound checks: this is where the real lesson of the day lives
+
+Before accepting 0.92-0.97 as a real result, two specific confounds were identified and tested, because a
+classifier does not know or care why two groups differ — it just finds whatever pattern separates them best,
+and if a non-biological confound separates the groups more cleanly than the real disease biology does, the
+model will exploit that shortcut and the AUC will look great while meaning something completely different than
+"this predicts DCM."
+
+**Confound 1: sequencing technology.** The scraped GSM metadata showed DCM samples are 4x more likely to be
+"Single Cell" protocol than donor samples (28% vs 7%, 5/18 DCM donors vs 2/27 donor donors). Single-cell and
+single-nucleus RNA-seq capture systematically different gene sets for protocol reasons unrelated to disease.
+Test: restrict to Single Nuclei samples only (13 DCM, 25 donor, technology held constant) and re-run the
+identical classifier. Result: AUC barely moved (within 1-3 points at every threshold, well inside the
+fold-to-fold noise). Technology is not the explanation.
+
+**Confound 2: chronic kidney disease.** Patient-level clinical metadata is not in GEO at all — it had to be
+pulled from the original paper's own Supplementary Table 20 ("Patient-level metadata," cross-referenced by
+sample name, 45/45 exact match against the h5ad's donor_id, a good independent confirmation the earlier GSM
+scraping and sample-name reconciliation was correct). That table surfaced a bigger imbalance than technology:
+39% of DCM patients have CKD vs 3.7% of donors (~10x skew). Cardiorenal syndrome is a real, expected clinical
+association, so this is not surprising, but CKD has its own transcriptomic footprint independent of heart
+disease, so it could not be waved away. Test: restrict to CKD-negative patients only (11 DCM, 26 donor) and
+re-run. Result: AUC dropped meaningfully this time — roughly 4-9 points lower at most thresholds (e.g. 0.941
+to 0.928 at 80th percentile, 0.950 to 0.856 at 95th) — but still sat well above chance (0.85-0.93 range), not
+collapsing toward 0.5. CKD explains some of the original inflation, more than technology did, but not all of
+it. The smaller sample after this restriction (down to 8-11 DCM donors at strict thresholds) also means some
+of that drop could be added noise rather than pure signal loss — the two aren't fully separable with this
+much data.
+
+**A broader check of remaining clinical fields** (Race, Ethnicity, HTN, Diabetes, Smoking) showed no comparable
+imbalance. Etiology-of-heart-failure, arrhythmia, and valve-disease fields were too sparse/free-text to check
+cleanly and were not force-fit into a conclusion. Collection dates (available for 38/45 donors, the Nuclei
+cohort only) showed DCM samples spanning a wider range (2010-2019, one notable outlier at 2019) than donor
+samples (2010-2015, tighter) — a mild batch-effect risk, flagged rather than resolved, since the Cell cohort's
+metadata table has no date field at all to check the remaining 7 donors against.
+
+**The permutation test, run to answer the sample-size question directly rather than keep guessing at
+individual columns.** Instead of testing one more specific hypothesis, this asks the general question: given
+only 18 DCM and 27 donor donors, how much AUC would you expect from pure chance alone? Method: shuffle the
+disease labels at the donor level (not cell level, which would break the honest per-donor grouping), re-run
+the identical classifier on the shuffled labels, repeat 20 times, and compare the real AUC against that null
+distribution. If the real AUC sits far above where chance lands, the result is not just small-sample luck.
+
+Run at the 80th-percentile CM-score threshold (the middle of the earlier sweep), real AUC 0.9413.
+Null distribution across 20 label-shuffled runs: mean 0.496, std 0.085, range 0.375-0.661. Permutation
+p-value (fraction of shuffles reaching or exceeding the real AUC): 0.0000 — zero of 20 shuffles came close.
+The null mean landing almost exactly on 0.5 is itself a good sanity check: that is precisely what pure
+coin-flip guessing should produce when there is no real signal to find, confirming the test is measuring
+what it claims to. The real AUC sits nearly 30 points above even the single highest random shuffle. If small
+sample size alone (18 DCM, 27 donor donors) could produce AUCs this high by chance, at least some of the 20
+shuffles should have landed near 0.94. None did. This is real evidence the classification signal is not a
+small-sample artifact, on top of already surviving two specific confound checks (technology, CKD).
+
+## The actual lesson of the day
+
+The most important thing learned today was not a result, it was a habit: **a high AUC is not the end of an
+analysis, it is the start of the real question.** The number itself does not tell you whether it reflects the
+biology you care about or something else entirely that happens to correlate with your labels. Today that
+"something else" turned out to be real and non-obvious twice in a row — first a lab protocol difference, then
+a clinical comorbidity that had nothing to do with the disease being studied but showed up disproportionately
+in the diseased group anyway. Both times, the fix was the same shape: find a way to hold the suspicious
+variable constant, rerun the exact same test, and see if the result survives losing its "advantage." It mostly
+did, which is what made it trustworthy — not the original number, but the number's behavior under attack.
+
+The harder, still-open part of this lesson: recognizing a confound in the first place required already knowing
+enough cardiology to be suspicious of a CKD imbalance, and required going and finding patient-level clinical
+metadata that was not even in the primary data source (GEO) at all, sitting instead in a supplementary table of
+the original paper. In a genuinely unfamiliar dataset, with no domain intuition to flag "check comorbidities"
+and no guarantee the deeper metadata is findable or exists at all, this same mistake could go completely
+undetected. That is the concrete skill worth building deliberately going forward: not just running the
+statistical checks once shown how, but developing a systematic habit of asking, for any new dataset, "what
+are all the ways two groups in this data could differ from each other that have nothing to do with the
+question I am asking" before trusting any single number that looks good.

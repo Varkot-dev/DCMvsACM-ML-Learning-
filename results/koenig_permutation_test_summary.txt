@@ -1,0 +1,5 @@
+real_auc=0.9413
+null_mean=0.4962
+null_std=0.0852
+null_max=0.6611
+p_value=0.0000
