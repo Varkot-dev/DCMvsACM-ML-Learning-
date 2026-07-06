@@ -175,6 +175,8 @@ answering a related but distinct question from the original AUC finding.
 Scripts: `cardiomyopathy-ml/build_koenig_atlas.py` (data assembly), `cardiomyopathy-ml/koenig_vcm3_replication.py`
 (threshold-sweep analysis). Results: `results/koenig_vcm3_replication.csv`.
 
+![vCM3.0 replication sweep](figL_koenig_replication_sweep.png)
+
 ## Phase 2 continued: does the classification signal (not just the gene score) replicate too
 
 The replication check above tested one gene program's average activity. A different, complementary question:
@@ -226,6 +228,8 @@ it. The smaller sample after this restriction (down to 8-11 DCM donors at strict
 of that drop could be added noise rather than pure signal loss — the two aren't fully separable with this
 much data.
 
+![Confound checks](figM_koenig_confound_checks.png)
+
 **A broader check of remaining clinical fields** (Race, Ethnicity, HTN, Diabetes, Smoking) showed no comparable
 imbalance. Etiology-of-heart-failure, arrhythmia, and valve-disease fields were too sparse/free-text to check
 cleanly and were not force-fit into a conclusion. Collection dates (available for 38/45 donors, the Nuclei
@@ -250,6 +254,8 @@ sample size alone (18 DCM, 27 donor donors) could produce AUCs this high by chan
 shuffles should have landed near 0.94. None did. This is real evidence the classification signal is not a
 small-sample artifact, on top of already surviving two specific confound checks (technology, CKD).
 
+![Permutation test](figN_permutation_test.png)
+
 ## The actual lesson of the day
 
 The most important thing learned today was not a result, it was a habit: **a high AUC is not the end of an
@@ -270,3 +276,32 @@ undetected. That is the concrete skill worth building deliberately going forward
 statistical checks once shown how, but developing a systematic habit of asking, for any new dataset, "what
 are all the ways two groups in this data could differ from each other that have nothing to do with the
 question I am asking" before trusting any single number that looks good.
+
+## Phase 3: calibration under shift (started)
+
+Moved to a feature branch (`phase3-calibration-under-shift`) for this, since it is a bigger multi-step
+pipeline than the same-day exploratory work above. Phase 3 asks a different question from anything measured
+so far: not "can a model rank DCM vs healthy correctly" (AUC), but "when the model states a confidence level,
+is that confidence honest." A model can rank perfectly and still be a liar about how sure it is.
+
+Step 1: trained an honest, patient-level classifier on Reichart for DCM vs `normal` (not DCM vs ACM — this
+disease contrast was chosen specifically because it exists in both cohorts, letting a model trained on one
+be meaningfully tested on the other; Koenig/Lavine has no ACM patients at all). Gene selection was restricted
+to the intersection of Reichart's and Koenig's gene lists from the start (22,453 of Reichart's 32,383 genes
+are present in Koenig), so the trained model would have no missing features when applied cross-cohort later
+— a first attempt selected genes from Reichart alone and found 24% missing from Koenig afterward, which would
+have needed error-prone zero-filling; restricting the gene pool up front avoided that entirely. Result: honest
+patient-level AUC 0.9668 (70 donors: 52 DCM, 18 normal).
+
+Step 2: applied that frozen, un-retrained model directly to Koenig/Lavine. Cross-cohort AUC: **0.6071** — a
+collapse from near-perfect to barely-better-than-chance, despite the disease biology (DCM vs healthy heart
+tissue) being identical between the two cohorts. This is domain shift, made concrete: the model's skill was
+never purely "recognize DCM," it was "recognize DCM as it looks specifically in Reichart's data," tangled up
+with Reichart-specific technical fingerprints (batch, platform, processing pipeline) that do not exist in
+Koenig. Nothing about the biology changed; the AUC still fell off a cliff.
+
+![Domain shift collapse](figO_domain_shift_collapse.png)
+
+Next: measure whether the model's *confidence* is honest, not just its ranking — reliability diagrams and
+Expected Calibration Error, computed both in-domain (Reichart's own held-out folds) and out-of-domain (this
+Koenig transfer), then test whether temperature scaling fit on Reichart survives being applied to Koenig too.
